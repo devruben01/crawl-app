@@ -1,14 +1,8 @@
 <?php
 
 use App\Constants\RouteName;
-use App\Http\Controllers\Api\CoachController;
-use App\Http\Controllers\Api\CountryController;
 use App\Http\Controllers\Api\CrawlerController;
-use App\Http\Controllers\Api\FixtureController;
-use App\Http\Controllers\Api\LeagueController;
-use App\Http\Controllers\Api\StandingController;
 use App\Http\Controllers\Api\SampleController;
-use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 

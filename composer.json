@@ -10,6 +10,7 @@
         "laravel/framework": "^10.0",
         "mongodb/laravel-mongodb": "^4.2",
         "php-open-source-saver/jwt-auth": "^2.0",
+        "symfony/browser-kit": "^6.4",
         "weidner/goutte": "^2.3"
     },
     "require-dev": {
