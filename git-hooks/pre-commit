@@ -1,0 +1,119 @@
+#!/bin/bash
+colorOff='\033[0m'        # Text Reset
+black='\033[0;30m'        # Black
+red='\033[0;31m'          # Red
+green='\033[0;32m'        # Green
+yellow='\033[0;33m'       # Yellow
+blue='\033[0;34m'         # Blue
+purple='\033[0;35m'       # Purple
+cyan='\033[0;36m'         # Cyan
+white='\033[0;37m'        # White
+onRed='\033[41m'          # Background Red
+
+BIN="./vendor/bin"
+
+# Determine if we have a phpcs.xml file
+if [[ -f ./phpcs.xml ]]; then
+	RULESET=./phpcs.xml
+else
+	RULESET=PSR12
+fi
+
+echo
+echo -e "$cyan PHP_CodeSniffer pre-commit hook – commit with the --no-verify option to skip the hook  "
+echo
+
+# Check whether PHP_CodeSniffer can be found
+if [ ! -f "$BIN/phpcs" ]
+then
+    echo -e "$yellow PHP_CodeSniffer not found – is it installed? 'composer require --dev squizlabs/php_codesniffer' $colorOff"
+    echo
+    exit 1
+fi
+
+# Retrieve staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep ".php\{0,1\}$")
+
+if [[ "$STAGED_FILES" = "" ]]; then
+  exit 0
+fi
+
+PASS=true
+
+# Run the PHPCS
+echo -e "$yellow Running PHPCS using the $RULESET standard $colorOff"
+echo
+
+for FILE in $STAGED_FILES
+do
+    PHPCS=("$BIN/phpcs" "--standard=$RULESET" "$FILE")
+    docker exec -t moki-app "${PHPCS[@]}"
+    if [[ "$?" == 0 ]]; then
+        echo "$green PHPCS Passed: $FILE $colorOff \n"
+    else
+        echo "$onRed PHPCS Failed: $FILE $colorOff \n"
+        PASS=false
+    fi
+done
+
+echo -e "$yellow Are you want to fix it automatically? $colorOff"
+read -p "Automatically fix violations when possible? [Y/n]:" < /dev/tty
+if [[ ! ("$REPLY" == 'y' || "$REPLY" == 'Y' || "$REPLY" == '') ]]
+then
+    echo
+    exit 1
+fi
+
+# Run the beautifier
+echo -e "$yellow Running PHPCBF using the $RULESET standard $colorOff"
+echo
+
+for FILE in $STAGED_FILES
+do
+PHPCBF=("$BIN/phpcbf" "--standard=$RULESET" "$FILE")
+docker exec -t moki-app "${PHPCBF[@]}"
+done
+
+# Stage the files
+echo -e "$yellow Re-staging updated files $colorOff \n"
+for FILE in $STAGED_FILES
+do
+    git add ${FILE}
+done
+
+# Run the sniffer again
+for FILE in $STAGED_FILES
+do
+    PHPCS=("$BIN/phpcs" "--standard=$RULESET" "$FILE")
+    docker exec -t moki-app "${PHPCS[@]}"
+    if [[ "$?" == 0 ]]; then
+        echo -e "$green PHPCS Passed: $FILE $colorOff"
+        PASS=true
+    else
+        echo -e "$onRed PHPCS Failed: $FILE $colorOff \n"
+        PASS=false
+    fi
+done
+
+if ! $PASS; then
+echo -e "$onRed COMMIT FAILED:$colorOff Your commit contains files that should pass PHPCS but do not. Please fix the PHPCS errors and try again.\n"
+    exit 1
+else
+    echo -e "\033[42mCOMMIT SUCCEEDED\033[0m\n"
+fi
+exit $?
+
+
+# Option 2 (use phpstan)
+# Get the container name from the .env file
+APP_NAME=$(grep -oP 'APP_NAME=\K.*' .env)
+CONTAINER_NAME="$APP_NAME-app"
+
+# Check if the container is running
+if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+  # Run phpstan in the container
+  docker exec $CONTAINER_NAME php vendor/bin/phpstan analyze
+else
+  echo "Error: The container '$CONTAINER_NAME' is not running."
+  exit 1
+fi
