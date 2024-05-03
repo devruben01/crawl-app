@@ -17,11 +17,14 @@ class UserTip extends Model
     protected $fillable = [
         'title',
         'content',
+        'home_name',
+        'away_name',
+        'score',
         'fi',
         'user_id',
         'blog_id',
-        'op',
-        'ah',
-        'ou',
+        'odds1',
+        'odds2',
+        'odds3',
     ];
 }
