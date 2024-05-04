@@ -21,10 +21,14 @@ class UserTip extends Model
         'away_name',
         'score',
         'fi',
-        'user_id',
-        'blog_id',
+        'user_info',
+        'bet',
+        'tip_id',
         'odds1',
         'odds2',
         'odds3',
+        'is_win',
+        'is_end',
+        'is_run',
     ];
 }
