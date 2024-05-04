@@ -15,7 +15,7 @@ class CrawlService
         $html = $website->html();
 
         $title = $website->filter('#blogtitle.title')->text('');
-        
+
         if (empty($title)) {
             return false;
         }
@@ -50,10 +50,19 @@ class CrawlService
         preg_match($regexDataWeek, $html, $dataWeek);
         preg_match($regexDataMonth, $html, $dataMonth);
 
-        $dataWeek = !empty($dataWeek[1]) ? explode(',', $dataWeek[1] ?? '') : [];
-        $dataMonth = !empty($dataMonth[1]) ? explode(',', $dataMonth[1] ?? '') : [];
+        $dataWeek = !empty($dataWeek[1]) ? explode(',', $dataWeek[1]) : [];
+        $dataMonth = !empty($dataMonth[1]) ? explode(',', $dataMonth[1]) : [];
 
-        $userTip = new UserTip([
+        $bet = [
+            0 => 'home',
+            1 => 'vs',
+            2 => 'away',
+        ];
+        $regexBet = '/dv\.format\(([^)]*)\)/';
+        preg_match($regexBet, $html, $choose);
+        $choose = array_search('" on"', array_map('trim', !empty($choose[1]) ? explode(",", $choose[1]) : []));
+        
+        $data = [
             'title' => $title,
             'content' => $content[1] ?? null,
             'home_name' => $website->filter('.team .home')->text(''),
@@ -79,6 +88,7 @@ class CrawlService
                     'avg_odds' => $dataMonth[3] ?? null,
                 ]
             ],
+            'bet' => $bet[$choose],
             'blog_id' => $blogId[1] ?? null,
             'odds1' => $odds1[1] ?? null,
             'odds2' => $odds2[1] ?? null,
@@ -86,7 +96,8 @@ class CrawlService
             'is_win' => $matchesIsWin[1] ?? null,
             'is_end' => $matchesIsEnd[1] ?? null,
             'is_run' => $matchesIsRun[1] ?? null,
-        ]);
+        ];
+        $userTip = new UserTip($data);
         $userTip->save();
         return true;
     }
