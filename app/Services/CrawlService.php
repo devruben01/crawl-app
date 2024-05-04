@@ -68,7 +68,7 @@ class CrawlService
             'home_name' => $website->filter('.team .home')->text(''),
             'away_name' => $website->filter('.team .away')->text(''),
             // 'score' => $score[1],
-            'fi' =>  $fi[0],
+            'fi' =>  $fi[0] ?? null,
             'user_info' => [
                 'id' => $website->filter('#opr_follow')->attr('v-uid', ''),
                 'username' => $website->filter('.Grounp .userDetailBox div.name')->text(''),
