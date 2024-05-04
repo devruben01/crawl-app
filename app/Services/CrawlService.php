@@ -27,7 +27,7 @@ class CrawlService
         preg_match('/var odds2 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds2);
         preg_match('/var odds3 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds3);
 
-        $fiText = $website->filter('.matchBox .col-4.links')->html();
+        $fiText = $website->filter('.matchBox .col-4.links')->html('');
         preg_match('/\b\d+\b/', $fiText, $fi);
 
         preg_match('/content: "([^"]+)"/', $html, $content);
@@ -61,7 +61,7 @@ class CrawlService
         $regexBet = '/dv\.format\(([^)]*)\)/';
         preg_match($regexBet, $html, $choose);
         $choose = array_search('" on"', array_map('trim', !empty($choose[1]) ? explode(",", $choose[1]) : []));
-        
+
         $data = [
             'title' => $title,
             'content' => $content[1] ?? null,
