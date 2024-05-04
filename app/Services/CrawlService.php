@@ -97,8 +97,7 @@ class CrawlService
             'is_end' => $matchesIsEnd[1] ?? null,
             'is_run' => $matchesIsRun[1] ?? null,
         ];
-        $userTip = new UserTip($data);
-        $userTip->save();
+        UserTip::updateOrCreate(['tip_id' => $tipId[1]], $data);
         return true;
     }
 }
