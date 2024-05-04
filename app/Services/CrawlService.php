@@ -20,8 +20,8 @@ class CrawlService
             return false;
         }
 
-        $metaBlog = $website->filterXPath('//meta[@property="og:url"]')->attr('content');
-        preg_match('/\/(\d+)$/', $metaBlog, $blogId);
+        $metaTip = $website->filterXPath('//meta[@property="og:url"]')->attr('content');
+        preg_match('/\/(\d+)$/', $metaTip, $tipId);
 
         preg_match('/var odds1 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds1);
         preg_match('/var odds2 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds2);
@@ -89,7 +89,7 @@ class CrawlService
                 ]
             ],
             'bet' => $bet[$choose],
-            'blog_id' => $blogId[1] ?? null,
+            'tip_id' => $tipId[1] ?? null,
             'odds1' => $odds1[1] ?? null,
             'odds2' => $odds2[1] ?? null,
             'odds3' => $odds3[1] ?? null,
