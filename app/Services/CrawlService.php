@@ -62,12 +62,31 @@ class CrawlService
         preg_match($regexBet, $html, $choose);
         $choose = array_search('" on"', array_map('trim', !empty($choose[1]) ? explode(",", $choose[1]) : []));
 
+        $patternMstate = '/var\s+mstate\s*=\s*(-?\d+)/';
+        $pattern_score = '/\$\("#sp_score_\d+"\)\.html\(\'<b.*?>(.*?)<\/b>\'\);/';
+
+
+        preg_match($patternMstate, $html, $matchesMstate);
+        $mState = isset($matchesMstate[1]) ? $matchesMstate[1] : null;
+        preg_match_all($pattern_score, $html, $matchesScore);
+
+        if(isset($matchesScore[1])) {
+            if($mState > 0) {
+                $score = $matchesScore[1][0] ?? null;
+            } else if($mState == -1) {
+                $score = $matchesScore[1][2] ?? null;
+            } else {
+                $score = $matchesScore[1][3] ?? null;
+            }
+        }
+
+
         $data = [
             'title' => $title,
             'content' => $content[1] ?? null,
             'home_name' => $website->filter('.team .home')->text(''),
             'away_name' => $website->filter('.team .away')->text(''),
-            // 'score' => $score[1],
+            'score' => $score ?? null,
             'fi' =>  $fi[0] ?? null,
             'user_info' => [
                 'id' => $website->filter('#opr_follow')->attr('v-uid', ''),
