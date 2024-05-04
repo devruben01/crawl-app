@@ -20,6 +20,7 @@ class CrawlerController extends Controller
         $client = new Client();
 
         $website = $client->request('GET', 'https://tips.bongdalu666.com/article/916370');
+        dd($website->filter('#contentCtn')->html());
         $html = $website->text();
 
         $metaBlog = $website->filterXPath('//meta[@property="og:url"]')->attr('content');
