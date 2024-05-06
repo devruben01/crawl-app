@@ -23,12 +23,11 @@ class CrawlService
         $metaTip = $website->filterXPath('//meta[@property="og:url"]')->attr('content');
         preg_match('/\/(\d+)$/', $metaTip, $tipId);
 
-        preg_match('/var odds1 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds1);
-        preg_match('/var odds2 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds2);
-        preg_match('/var odds3 = changeOdds\((\d+\.\d+),isEu\);/', $html, $odds3);
-
+        preg_match('/var odds1 = changeOdds\((\d+(?:\.\d+)?),isEu\);/', $html, $odds1);
+        preg_match('/var odds2 = changeOdds\((\d+(?:\.\d+)?),isEu\);/', $html, $odds2);
+        preg_match('/var odds3 = changeOdds\((\d+(?:\.\d+)?),isEu\);/', $html, $odds3);
         $fiText = $website->filter('.matchBox .col-4.links')->html('');
-        preg_match('/\b\d+\b/', $fiText, $fi);
+        preg_match('/soccerInPage\.analysis\(\'(\d+)\',/', $fiText, $fi);
 
         preg_match('/content: "([^"]+)"/', $html, $content);
         preg_match('/\$\("#sp_score_(\d+)"\)\.html\(\'(\w+-\w+)\'\)/', $html, $score);
@@ -87,7 +86,7 @@ class CrawlService
             'home_name' => $website->filter('.team .home')->text(''),
             'away_name' => $website->filter('.team .away')->text(''),
             'score' => $score ?? null,
-            'fi' =>  $fi[0] ?? null,
+            'fi' =>  $fi[1] ?? null,
             'user_info' => [
                 'id' => $website->filter('#opr_follow')->attr('v-uid', ''),
                 'username' => $website->filter('.Grounp .userDetailBox div.name')->text(''),
